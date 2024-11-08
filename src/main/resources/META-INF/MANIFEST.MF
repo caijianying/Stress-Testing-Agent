@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Agent-Class: com.xiaobaicai.agent.StressTestingAgent
+Premain-Class:  com.xiaobaicai.agent.StressTestingAgent
+Can-Redefine-Classes: true
+Can-Retransform-Classes: true
