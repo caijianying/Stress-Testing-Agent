@@ -28,7 +28,7 @@ public class RuntimeContext {
         List<TraceModel> traceInfos = getTraceInfos(traceId);
         try {
             TraceModel bannerModel = new TraceModel();
-            bannerModel.setName("Service Invocation Monitor | Result ");
+            bannerModel.setName("Stress Testing Agent | Result ");
             bannerModel.setSpanId("0");
             bannerModel.setCostTime(0L);
             traceInfos.add(bannerModel);

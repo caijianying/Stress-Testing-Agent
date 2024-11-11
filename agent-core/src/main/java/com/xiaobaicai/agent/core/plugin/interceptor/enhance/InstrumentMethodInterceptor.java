@@ -1,5 +1,7 @@
 package com.xiaobaicai.agent.core.plugin.interceptor.enhance;
 
+import com.xiaobaicai.agent.core.log.Logger;
+import com.xiaobaicai.agent.core.log.LoggerFactory;
 import com.xiaobaicai.agent.core.utils.IgnoredUtils;
 import net.bytebuddy.implementation.bind.annotation.*;
 
@@ -12,6 +14,7 @@ import java.util.concurrent.Callable;
  */
 public class InstrumentMethodInterceptor {
 
+    protected static final Logger LOGGER = LoggerFactory.getLogger(InstrumentMethodInterceptor.class);
 
     private MethodAroundInterceptorV1 interceptor;
 
@@ -31,6 +34,9 @@ public class InstrumentMethodInterceptor {
         if (interceptor.isInvalid(obj, clazz, method, allArguments, method.getParameterTypes())) {
             return callable.call();
         }
+
+        LOGGER.info(clazz.getName() + "." + method.getName() + " start");
+
         try {
             interceptor.beforeMethod(obj, clazz, method, allArguments, method.getParameterTypes());
         } catch (Throwable e) {
@@ -44,6 +50,7 @@ public class InstrumentMethodInterceptor {
         }
 
         try {
+            LOGGER.info(clazz.getName() + "." + method.getName() + "  end");
             interceptor.afterMethod(obj, clazz, method, allArguments, method.getParameterTypes());
         } catch (Throwable e) {
 

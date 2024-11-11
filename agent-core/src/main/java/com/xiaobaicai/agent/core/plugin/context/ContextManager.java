@@ -1,19 +1,14 @@
 package com.xiaobaicai.agent.core.plugin.context;
 
 import cn.hutool.core.lang.UUID;
-import com.google.common.collect.Lists;
+import cn.hutool.json.JSONUtil;
 import com.xiaobaicai.agent.core.boot.BootService;
-import com.xiaobaicai.agent.core.config.Config;
-import com.xiaobaicai.agent.core.console.TraceConsoleDTO;
-import com.xiaobaicai.agent.core.constants.AgentConstant;
-import com.xiaobaicai.agent.core.enums.ConsoleColorEnum;
+import com.xiaobaicai.agent.core.log.Logger;
+import com.xiaobaicai.agent.core.log.LoggerFactory;
 import com.xiaobaicai.agent.core.model.TraceSegment;
 import com.xiaobaicai.agent.core.plugin.span.LocalSpan;
 import com.xiaobaicai.agent.core.trace.ComponentDefine;
-import com.xiaobaicai.agent.core.utils.ConfigBanner;
-
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Stack;
 
 /**
@@ -22,6 +17,8 @@ import java.util.Stack;
  * @date 2024/1/26 星期五 4:04 下午
  */
 public class ContextManager implements BootService {
+
+    public static final Logger LOGGER = LoggerFactory.getLogger(ContextManager.class);
 
     private static final LinkedList<String> activeSpanIdMap = new LinkedList<>();
 
@@ -46,6 +43,7 @@ public class ContextManager implements BootService {
         getStack().push(localSpan.getSpanId());
         activeSpanIdMap.addLast(localSpan.getSpanId());
         startSpan(localSpan, start);
+        LOGGER.info("createSpan => " + JSONUtil.toJsonStr(localSpan));
     }
 
     private static Stack<String> getStack() {
@@ -79,7 +77,10 @@ public class ContextManager implements BootService {
             String spanId = getStack().pop();
             RuntimeContext.exit(traceId, spanId);
             activeSpanIdMap.remove(spanId);
+            LOGGER.info("stopSpan =>  traceId=" + traceId + ",spanId:" + spanId);
         }
+        LOGGER.info("stopSpan => activeSpanIdMap.isEmpty(): " + activeSpanIdMap.isEmpty());
+        LOGGER.info("stopSpan => activeSpanIdMap: " + JSONUtil.toJsonStr(activeSpanIdMap));
         if (activeSpanIdMap.isEmpty()) {
             printInformation(traceId);
             clear(traceId);
@@ -122,19 +123,8 @@ public class ContextManager implements BootService {
     }
 
     private static void printInformation(String traceId) {
-        List<TraceConsoleDTO> consoleDTOList = Lists.newArrayList();
         TraceSegment traceSegment = RuntimeContext.getTraceSegment(traceId);
-        StringBuilder builder = new StringBuilder();
-        TrackManager.append(builder, traceSegment, consoleDTOList);
-        String colorString = ConfigBanner.toColorString(ConsoleColorEnum.GREEN, builder);
-        System.out.println(colorString);
-        int sampleRate = Integer.valueOf(Config.get(AgentConstant.MONITOR_SAMPLE_RATE).toString());
-        Object path = Config.get(AgentConstant.MONITOR_AGENT_PATH);
-        if (path != null) {
-            if (consoleDTOList.size() <= sampleRate) {
-
-            }
-        }
+        LOGGER.info(JSONUtil.toJsonStr(traceSegment));
     }
 
     public static String getOrCreateTraceId(ContextSnapshot contextSnapshot) {

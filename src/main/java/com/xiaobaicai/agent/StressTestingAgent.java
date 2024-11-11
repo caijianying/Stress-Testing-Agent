@@ -7,7 +7,6 @@ import com.xiaobaicai.agent.core.plugin.PluginFinder;
 import com.xiaobaicai.agent.core.plugin.PluginUtil;
 import com.xiaobaicai.agent.core.plugin.loader.AgentClassLoader;
 import net.bytebuddy.agent.builder.AgentBuilder;
-
 import java.lang.instrument.Instrumentation;
 import java.util.List;
 

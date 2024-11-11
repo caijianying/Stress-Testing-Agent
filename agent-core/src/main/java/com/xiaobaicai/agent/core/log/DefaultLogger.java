@@ -9,16 +9,13 @@ import java.time.LocalDateTime;
  */
 public class DefaultLogger implements Logger {
 
-    private String className;
+    private final String className;
 
-    private String projectVersion;
-
-    private String rootProjectName;
+    private final String rootProjectName;
 
     public DefaultLogger(Class clazz) {
         Package pkg = clazz.getPackage();
-        this.className = clazz.getPackageName() + "." + clazz.getSimpleName();
-        this.projectVersion = pkg.getImplementationVersion();
+        this.className = makePackageNameShorter(clazz.getPackageName() + "." + clazz.getSimpleName());
         this.rootProjectName = pkg.getImplementationTitle();
     }
 

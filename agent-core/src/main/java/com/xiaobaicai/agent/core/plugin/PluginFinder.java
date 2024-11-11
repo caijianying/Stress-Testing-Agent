@@ -6,6 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import cn.hutool.json.JSONUtil;
+import com.xiaobaicai.agent.core.log.Logger;
+import com.xiaobaicai.agent.core.log.LoggerFactory;
 import com.xiaobaicai.agent.core.plugin.bytebuddy.AbstractJunction;
 import com.xiaobaicai.agent.core.plugin.match.ClassMatch;
 import com.xiaobaicai.agent.core.plugin.match.IndirectMatch;
@@ -22,12 +25,13 @@ import static net.bytebuddy.matcher.ElementMatchers.not;
  * @date 2023/1/3 星期二 11:12 上午
  */
 public class PluginFinder {
+    private static final Logger LOGGER = LoggerFactory.getLogger(PluginFinder.class);
     private final Map<String, LinkedList<AbstractClassEnhancePluginDefine>>
-        nameMatchDefine = new HashMap<String, LinkedList<AbstractClassEnhancePluginDefine>>();
+            nameMatchDefine = new HashMap<String, LinkedList<AbstractClassEnhancePluginDefine>>();
     private final List<AbstractClassEnhancePluginDefine> signatureMatchDefine = new ArrayList<AbstractClassEnhancePluginDefine>();
 
 
-    public PluginFinder(List<AbstractClassEnhancePluginDefine> plugins){
+    public PluginFinder(List<AbstractClassEnhancePluginDefine> plugins) {
         for (AbstractClassEnhancePluginDefine plugin : plugins) {
             ClassMatch match = plugin.enhanceClass();
 
@@ -79,6 +83,10 @@ public class PluginFinder {
             if (match.isMatch(typeDescription)) {
                 matchedPlugins.add(pluginDefine);
             }
+        }
+
+        for (AbstractClassEnhancePluginDefine matchedPlugin : matchedPlugins) {
+            LOGGER.info("PluginFinder.plugin: " + matchedPlugin.getClass().getName());
         }
 
         return matchedPlugins;

@@ -16,11 +16,11 @@ public class RestControllerInstrumentation extends AbstractClassEnhancePluginDef
 
     public static final String ENHANCE_ANNOTATION = "org.springframework.web.bind.annotation.RestController";
 
-    public static final String INTERCEPTOR_CLASS = "com.caijy.agent.plugin.mvc.annotation.MvcAnnotationInterceptor";
+    public static final String INTERCEPTOR_CLASS = "com.xiaobaicai.agent.plugins.spring6.mvc.annotation.MvcAnnotationInterceptor";
 
     @Override
     protected ClassMatch enhanceClass() {
-        return ClassAnnotationMatch.byClassAnnotationMatch(new String[] {ENHANCE_ANNOTATION});
+        return ClassAnnotationMatch.byClassAnnotationMatch(new String[]{ENHANCE_ANNOTATION});
     }
 
     @Override
@@ -35,23 +35,23 @@ public class RestControllerInstrumentation extends AbstractClassEnhancePluginDef
 
     @Override
     public InstanceMethodsInterceptPoint[] getInstanceMethodsInterceptPoints() {
-        return new InstanceMethodsInterceptPoint[] {
-            new InstanceMethodsInterceptPoint() {
-                @Override
-                public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                    return null;
-                }
+        return new InstanceMethodsInterceptPoint[]{
+                new InstanceMethodsInterceptPoint() {
+                    @Override
+                    public ElementMatcher<MethodDescription> getMethodsMatcher() {
+                        return null;
+                    }
 
-                @Override
-                public String getMethodsInterceptor() {
-                    return INTERCEPTOR_CLASS;
-                }
+                    @Override
+                    public String getMethodsInterceptor() {
+                        return INTERCEPTOR_CLASS;
+                    }
 
-                @Override
-                public boolean isOverrideArgs() {
-                    return false;
+                    @Override
+                    public boolean isOverrideArgs() {
+                        return false;
+                    }
                 }
-            }
         };
     }
 }

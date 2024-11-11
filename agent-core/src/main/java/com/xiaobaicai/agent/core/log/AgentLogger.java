@@ -17,16 +17,14 @@ public class AgentLogger implements Logger {
             "|_|   \\__,_|_| |_|\\__|_|_| |_| |_|\\___|  \n" +
             " :: %s ::     (v%s)\n";
 
-    private String className;
+    private final String className;
 
-    private String projectVersion;
-
-    private String rootProjectName;
+    private final String rootProjectName;
 
     public AgentLogger(Class clazz) {
         Package pkg = clazz.getPackage();
-        this.className = clazz.getPackageName() + "." + clazz.getSimpleName();
-        this.projectVersion = pkg.getImplementationVersion();
+        this.className = makePackageNameShorter(clazz.getPackageName() + "." + clazz.getSimpleName());
+        String projectVersion = pkg.getImplementationVersion();
         this.rootProjectName = pkg.getImplementationTitle();
         System.out.printf(BANNER, rootProjectName, projectVersion);
     }

@@ -11,7 +11,7 @@ apply(from = rootProject.file("config.gradle.kts"))
 val versions = extra["versions"] as Map<*, *>
 
 group = "com.xiaobaicai.agent"
-version = "1.0.0"
+version = "${extra["projectVersion"]}"
 
 repositories {
     mavenCentral()
@@ -63,7 +63,7 @@ tasks.named("build") {
 tasks.register<Zip>("multiModuleZip") {
     dependsOn("shadowJar") // 确保 shadowJar 先执行
 
-    from("$buildDir/libs") {
+    from("$projectDir/build/libs") {
         into("/libs")
     }
     // 为每个子模块添加 JAR 文件到 ZIP 包中
@@ -78,6 +78,6 @@ tasks.register<Zip>("multiModuleZip") {
     }
 
     // ZIP 文件的输出目录和文件名
-    destinationDirectory.set(file("$buildDir/distributions"))
-    archiveFileName.set("multi-module-project.zip")
+    destinationDirectory.set(file("$projectDir/build/distributions"))
+    archiveFileName.set("${project.name}-$version.zip")
 }
