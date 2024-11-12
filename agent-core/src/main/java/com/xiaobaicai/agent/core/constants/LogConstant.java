@@ -8,8 +8,13 @@ package com.xiaobaicai.agent.core.constants;
 public interface LogConstant {
 
     /**
-     * 保持className长度为4，超过X则对前X个名字进行缩写
+     * 保持className单词长度为4，超过X则对前X个名字进行缩写
      **/
-    Integer CLASSNAME_KEEP_LEN = 4;
+    Integer CLASSNAME_WORD_KEEP_LEN = 4;
+
+    /**
+     * 保持className总长度
+     **/
+    Integer CLASSNAME_KEEP_LEN = 43;
 
 }
