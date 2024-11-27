@@ -18,6 +18,8 @@ repositories {
 }
 
 dependencies {
+    implementation("org.mybatis:mybatis:3.5.9")
+    implementation("${versions["javax-servlet"]}")
     implementation(project(":agent-core"))
     implementation("${versions["byte-buddy"]}")
     implementation("${versions["byte-buddy-agent"]}")
@@ -29,13 +31,15 @@ dependencies {
     testCompileOnly("${versions["junit"]}")
     testImplementation("${versions["junit.jupiter.api"]}")
     testImplementation("${versions["junit.jupiter.engine"]}")
+
+
 }
 
 tasks.test {
     useJUnitPlatform()
 }
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(11)
 }
 
 tasks.withType<ShadowJar> {

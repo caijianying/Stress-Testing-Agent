@@ -2,14 +2,13 @@ package com.xiaobaicai.agent;
 
 import com.xiaobaicai.agent.core.log.Logger;
 import com.xiaobaicai.agent.core.log.LoggerFactory;
-import com.xiaobaicai.agent.core.plugin.AbstractClassEnhancePluginDefine;
-import com.xiaobaicai.agent.core.plugin.PluginFinder;
 import com.xiaobaicai.agent.core.plugin.PluginUtil;
 import com.xiaobaicai.agent.core.plugin.loader.AgentClassLoader;
 import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.implementation.bind.annotation.*;
 import java.lang.instrument.Instrumentation;
-import java.util.List;
-
+import java.lang.reflect.Method;
+import java.util.concurrent.Callable;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 /**
@@ -26,8 +25,6 @@ public class StressTestingAgent {
 
         AgentClassLoader.initDefaultLoader();
 
-        PluginFinder pluginFinder = new PluginFinder(PluginUtil.loadPlugin());
-
         AgentBuilder agentBuilder = new AgentBuilder.Default().ignore(
                 nameStartsWith("net.bytebuddy.")
                         .or(nameStartsWith("org.slf4j."))
@@ -38,24 +35,38 @@ public class StressTestingAgent {
                         .or(nameStartsWith("sun.reflect"))
                         .or(isSynthetic()));
 
-        agentBuilder.type(pluginFinder.buildMatch())
-                .transform((builder, type, classLoader, module) -> {
-                    try {
-                        List<AbstractClassEnhancePluginDefine> enhancePluginDefines = pluginFinder.find(type);
-                        for (AbstractClassEnhancePluginDefine pluginDefine : enhancePluginDefines) {
-                            builder = pluginDefine.enhance(builder, type, classLoader);
-                        }
-                        return builder;
-                    } catch (Throwable e) {
+        agentBuilder = PluginUtil.loadPluginsThenTransfer(agentBuilder);
 
-                    }
-                    return builder;
-                }).installOn(inst);
+
+//        agentBuilder = agentBuilder.type(ElementMatchers.isAnnotatedWith(ElementMatchers.named("org.springframework.web.bind.annotation.RestController")))
+//                .transform((builder, typeDescription, classLoader, module) -> builder
+//                        .method(ElementMatchers.isPublic()).intercept(MethodDelegation.to(new SqlInterceptor()))
+//                );
+//
+//        agentBuilder = agentBuilder.type(ElementMatchers.named("org.springframework.web.servlet.DispatcherServlet"))
+//                .transform((builder, typeDescription, classLoader, module) -> builder
+//                        .method(ElementMatchers.named("doDispatch")).intercept(MethodDelegation.to(new SqlInterceptor()))
+//                );
+
+        agentBuilder.with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+                .installOn(inst);
 
     }
+
+    public static class SqlInterceptor {
+        @RuntimeType
+        public Object intercept(@This Object obj, @Origin Class<?> clazz, @AllArguments Object[] allArguments,
+                                @Origin Method method,
+                                @SuperCall Callable<?> callable) throws Throwable {
+            LOGGER.info(clazz.getName() + "." + method.getName() + " start");
+            Object call = callable.call();
+            LOGGER.info(clazz.getName() + "." + method.getName() + " end.");
+            return call;
+        }
+    }
+
 
     public static void agentmain(String agentArgs, Instrumentation inst) {
 
     }
-
 }

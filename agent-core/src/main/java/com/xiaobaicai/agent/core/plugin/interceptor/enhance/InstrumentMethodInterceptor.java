@@ -16,7 +16,7 @@ public class InstrumentMethodInterceptor {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(InstrumentMethodInterceptor.class);
 
-    private MethodAroundInterceptorV1 interceptor;
+    private final MethodAroundInterceptorV1 interceptor;
 
     public InstrumentMethodInterceptor(MethodAroundInterceptorV1 interceptor) {
         this.interceptor = interceptor;
@@ -35,25 +35,23 @@ public class InstrumentMethodInterceptor {
             return callable.call();
         }
 
-        LOGGER.info(clazz.getName() + "." + method.getName() + " start");
-
         try {
             interceptor.beforeMethod(obj, clazz, method, allArguments, method.getParameterTypes());
-        } catch (Throwable e) {
-
+        } catch (Throwable ex) {
+            LOGGER.error(ex.getMessage());
         }
-        Object call = null;
-        try {
-            call = callable.call();
-        } catch (Throwable e) {
-            throw e;
-        }
+        Object call = callable.call();
 
         try {
-            LOGGER.info(clazz.getName() + "." + method.getName() + "  end");
+            interceptor.handleResult(call);
+        } catch (Throwable ex) {
+            LOGGER.error(ex.getMessage());
+        }
+
+        try {
             interceptor.afterMethod(obj, clazz, method, allArguments, method.getParameterTypes());
-        } catch (Throwable e) {
-
+        } catch (Throwable ex) {
+            LOGGER.error(ex.getMessage());
         }
         return call;
     }

@@ -8,7 +8,10 @@ import com.xiaobaicai.agent.core.log.LoggerFactory;
 import com.xiaobaicai.agent.core.model.TraceSegment;
 import com.xiaobaicai.agent.core.plugin.span.LocalSpan;
 import com.xiaobaicai.agent.core.trace.ComponentDefine;
+
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Stack;
 
 /**
@@ -25,6 +28,7 @@ public class ContextManager implements BootService {
     private static final ThreadLocal<Stack> STACK_THREAD_LOCAL = new ThreadLocal<>();
 
     private static final ThreadLocal<String> LOCAL_TRACE_ID = new ThreadLocal<>();
+    private static final ThreadLocal<Map<String, Object>> LOCAL_PROPERTY = new ThreadLocal<>();
 
     public static void createSpan(ComponentDefine component, String operatorName) {
         createSpan(component, operatorName, null);
@@ -97,7 +101,7 @@ public class ContextManager implements BootService {
     }
 
     public static ContextSnapshot capture() {
-        return new ContextSnapshot(activeSpanIdMap.getLast(), LOCAL_TRACE_ID.get());
+        return new ContextSnapshot(activeSpanIdMap.isEmpty() ? null : activeSpanIdMap.getLast(), LOCAL_TRACE_ID.get());
     }
 
     public static boolean isRoot() {
@@ -138,6 +142,20 @@ public class ContextManager implements BootService {
             LOCAL_TRACE_ID.set(traceId);
         }
         return traceId;
+    }
+
+    public static void setProperty(String key, Object value) {
+        Map<String, Object> properties = LOCAL_PROPERTY.get();
+        if (properties == null) {
+            properties = new HashMap<>();
+            LOCAL_PROPERTY.set(properties);
+        }
+        properties.put(key, value);
+    }
+
+    public static Object getProperty(String key) {
+        Map<String, Object> properties = LOCAL_PROPERTY.get();
+        return properties == null ? null : properties.get(key);
     }
 
     @Override

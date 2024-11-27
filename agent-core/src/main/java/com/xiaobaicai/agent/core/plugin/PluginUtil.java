@@ -11,10 +11,19 @@ import java.util.LinkedList;
 import java.util.List;
 
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.json.JSONUtil;
 import com.xiaobaicai.agent.core.log.Logger;
 import com.xiaobaicai.agent.core.log.LoggerFactory;
+import com.xiaobaicai.agent.core.plugin.interceptor.InstanceMethodsInterceptPoint;
+import com.xiaobaicai.agent.core.plugin.interceptor.enhance.InstrumentMethodInterceptor;
+import com.xiaobaicai.agent.core.plugin.interceptor.enhance.MethodAroundInterceptorV1;
 import com.xiaobaicai.agent.core.plugin.loader.AgentClassLoader;
+import com.xiaobaicai.agent.core.plugin.match.ClassMatch;
+import com.xiaobaicai.agent.core.plugin.match.IndirectMatch;
+import com.xiaobaicai.agent.core.plugin.match.NameMatch;
+import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.implementation.MethodDelegation;
+import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatchers;
 
 /**
  * @author liguang
@@ -41,6 +50,7 @@ public class PluginUtil {
                 plugins.add(plugin);
             }
         } catch (Throwable e) {
+            e.printStackTrace();
             LOGGER.error("load plugin failure.");
         }
         return plugins;
@@ -83,6 +93,46 @@ public class PluginUtil {
         } finally {
             input.close();
         }
+    }
+
+    public static AgentBuilder loadPluginsThenTransfer(AgentBuilder initialAgentBuilder) {
+        AgentBuilder agentBuilder = initialAgentBuilder;
+        for (AbstractClassEnhancePluginDefine pluginDefine : loadPlugin()) {
+            ElementMatcher.Junction typeJunction = null;
+            ClassMatch classMatch = pluginDefine.enhanceClass();
+            if (classMatch instanceof NameMatch) {
+                NameMatch nameMatch = (NameMatch) classMatch;
+                typeJunction = ElementMatchers.named(nameMatch.getClassName());
+            }
+            if (classMatch instanceof IndirectMatch) {
+                IndirectMatch indirectMatch = (IndirectMatch) classMatch;
+                typeJunction = indirectMatch.buildJunction();
+            }
+            if (typeJunction == null) {
+                continue;
+            }
+
+            InstanceMethodsInterceptPoint[] interceptPoints = pluginDefine.getInstanceMethodsInterceptPoints();
+            for (InstanceMethodsInterceptPoint point : interceptPoints) {
+                Object newInstance = null;
+                try {
+                    newInstance = AgentClassLoader.getDefault().loadClass(point.getMethodsInterceptor()).newInstance();
+                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+                if (newInstance == null) {
+                    continue;
+                }
+                Object finalNewInstance = newInstance;
+                agentBuilder = agentBuilder.type(typeJunction)
+                        .transform((builder, typeDescription, classLoader, module) -> builder
+                                .method(point.getMethodsMatcher())
+                                .intercept(MethodDelegation.to(new InstrumentMethodInterceptor((MethodAroundInterceptorV1) finalNewInstance)))
+                        );
+            }
+        }
+
+        return agentBuilder;
     }
 
 }

@@ -1,0 +1,2 @@
+mybatis3-boundSql=com.xiaobaicai.agent.plugins.mybatis3.BoundSqlInstrumentation
+mybatis3-default-sqlSessionFactory=com.xiaobaicai.agent.plugins.mybatis3.DefaultSqlSessionFactoryInstrumentation

@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import cn.hutool.json.JSONUtil;
 import com.xiaobaicai.agent.core.log.Logger;
 import com.xiaobaicai.agent.core.log.LoggerFactory;
 import com.xiaobaicai.agent.core.plugin.bytebuddy.AbstractJunction;

@@ -5,5 +5,11 @@ plugins {
 rootProject.name = "Stress-Testing-Agent"
 include("agent-core")
 include("agent-plugins")
-include("agent-plugins:spring6-mvc-annotatoion")
-findProject(":agent-plugins:spring6-mvc-annotatoion")?.name = "spring6-mvc-annotatoion"
+include("agent-plugins:spring5-annotation-plugin")
+findProject(":agent-plugins:spring5-annotation-plugin")?.name = "spring5-annotation-plugin"
+include("agent-plugins:spring5-mvc-annotation-plugin")
+findProject(":agent-plugins:spring5-mvc-annotation-plugin")?.name = "spring5-mvc-annotation-plugin"
+include("agent-plugins:mybatis3-plugin")
+findProject(":agent-plugins:mybatis3-plugin")?.name = "mybatis3-plugin"
+include("agent-plugins:javax-servlet-plugin")
+findProject(":agent-plugins:javax-servlet-plugin")?.name = "javax-servlet-plugin"

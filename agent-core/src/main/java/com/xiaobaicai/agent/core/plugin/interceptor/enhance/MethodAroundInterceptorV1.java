@@ -19,4 +19,6 @@ public interface MethodAroundInterceptorV1 {
     void afterMethod(Object obj, Class<?> clazz, Method method, Object[] allArguments, Class<?>[] argumentsTypes)
             throws Throwable;
 
+    default void handleResult(Object call) {
+    }
 }

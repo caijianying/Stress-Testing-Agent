@@ -7,7 +7,6 @@ import java.util.List;
 import net.bytebuddy.description.annotation.AnnotationDescription;
 import net.bytebuddy.description.annotation.AnnotationList;
 import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatcher.Junction;
 
 import static net.bytebuddy.matcher.ElementMatchers.isAnnotatedWith;

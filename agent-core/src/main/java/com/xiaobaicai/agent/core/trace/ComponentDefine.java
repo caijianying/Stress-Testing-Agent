@@ -8,7 +8,8 @@ public enum ComponentDefine {
     JDK_THREAD,
     SPRING,
     MVC,
-    DUBBO;
+    DUBBO,
+    ;
 
     private String name;
 }
