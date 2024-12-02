@@ -33,7 +33,7 @@ public abstract class AbstractSpringAnnotationInstrumentation extends AbstractCl
                 new InstanceMethodsInterceptPoint() {
                     @Override
                     public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                        return ElementMatchers.any();
+                        return ElementMatchers.isPublic();
                     }
 
                     @Override

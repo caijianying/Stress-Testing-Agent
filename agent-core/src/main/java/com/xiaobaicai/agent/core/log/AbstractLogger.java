@@ -15,12 +15,10 @@ public abstract class AbstractLogger implements Logger {
 
     protected final String className;
 
-    protected final String rootProjectName;
+    protected static final String ROOT_PROJECT_NAME = AbstractLogger.class.getPackage().getImplementationTitle();
 
     protected AbstractLogger(Class clazz) {
         this.className = makeClassNameShorter(clazz.getPackageName() + "." + clazz.getSimpleName());
-        Package pkg = clazz.getPackage();
-        this.rootProjectName = pkg.getImplementationTitle();
     }
 
     /**
@@ -75,11 +73,11 @@ public abstract class AbstractLogger implements Logger {
 
     @Override
     public void info(String msg) {
-        System.out.printf("%s INFO  --- [ %s ] %s: %s\n", LocalDateTime.now(), rootProjectName, className, msg);
+        System.out.printf("%s INFO  --- [ %s ] %s: %s\n", LocalDateTime.now(), ROOT_PROJECT_NAME, className, msg);
     }
 
     @Override
     public void error(String msg) {
-        System.err.printf("%s ERROR  --- [ %s ] %s: %s\n", LocalDateTime.now(), rootProjectName, className, msg);
+        System.err.printf("%s ERROR  --- [ %s ] %s: %s\n", LocalDateTime.now(), ROOT_PROJECT_NAME, className, msg);
     }
 }

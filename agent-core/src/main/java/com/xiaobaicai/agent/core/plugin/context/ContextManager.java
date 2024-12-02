@@ -1,7 +1,6 @@
 package com.xiaobaicai.agent.core.plugin.context;
 
 import cn.hutool.core.lang.UUID;
-import cn.hutool.json.JSONUtil;
 import com.xiaobaicai.agent.core.boot.BootService;
 import com.xiaobaicai.agent.core.log.Logger;
 import com.xiaobaicai.agent.core.log.LoggerFactory;
@@ -47,7 +46,6 @@ public class ContextManager implements BootService {
         getStack().push(localSpan.getSpanId());
         activeSpanIdMap.addLast(localSpan.getSpanId());
         startSpan(localSpan, start);
-        LOGGER.info("createSpan => " + JSONUtil.toJsonStr(localSpan));
     }
 
     private static Stack<String> getStack() {
@@ -81,10 +79,7 @@ public class ContextManager implements BootService {
             String spanId = getStack().pop();
             RuntimeContext.exit(traceId, spanId);
             activeSpanIdMap.remove(spanId);
-            LOGGER.info("stopSpan =>  traceId=" + traceId + ",spanId:" + spanId);
         }
-        LOGGER.info("stopSpan => activeSpanIdMap.isEmpty(): " + activeSpanIdMap.isEmpty());
-        LOGGER.info("stopSpan => activeSpanIdMap: " + JSONUtil.toJsonStr(activeSpanIdMap));
         if (activeSpanIdMap.isEmpty()) {
             printInformation(traceId);
             clear(traceId);
@@ -128,7 +123,6 @@ public class ContextManager implements BootService {
 
     private static void printInformation(String traceId) {
         TraceSegment traceSegment = RuntimeContext.getTraceSegment(traceId);
-        LOGGER.info(JSONUtil.toJsonStr(traceSegment));
     }
 
     public static String getOrCreateTraceId(ContextSnapshot contextSnapshot) {

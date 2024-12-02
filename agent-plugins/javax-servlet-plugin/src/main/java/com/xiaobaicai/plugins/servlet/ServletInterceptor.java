@@ -28,7 +28,6 @@ public class ServletInterceptor implements MethodAroundInterceptorV1 {
                 String headerValue = request.getHeader(StressTestingConstant.HEADER_NAME_STRESS_TESTING_FLAG);
                 ContextManager.setProperty(StressTestingConstant.HEADER_NAME_STRESS_TESTING_FLAG, StressTestingConstant.HEADER_VALUE_STRESS_TESTING_FLAG.equals(headerValue));
                 ContextManager.setProperty(StressTestingConstant.SHADOW_MODE_KEY, StressTestingConstant.SHADOW_MODE_DEFAULT_VALUE);
-                ContextManager.setProperty(StressTestingConstant.SHADOW_MODE_KEY, StressTestingConstant.SHADOW_MODE_DATABASE_VALUE);
             }
         }
     }

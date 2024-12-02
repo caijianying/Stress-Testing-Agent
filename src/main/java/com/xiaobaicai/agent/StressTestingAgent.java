@@ -5,10 +5,7 @@ import com.xiaobaicai.agent.core.log.LoggerFactory;
 import com.xiaobaicai.agent.core.plugin.PluginUtil;
 import com.xiaobaicai.agent.core.plugin.loader.AgentClassLoader;
 import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.implementation.bind.annotation.*;
 import java.lang.instrument.Instrumentation;
-import java.lang.reflect.Method;
-import java.util.concurrent.Callable;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 /**
@@ -52,19 +49,6 @@ public class StressTestingAgent {
                 .installOn(inst);
 
     }
-
-    public static class SqlInterceptor {
-        @RuntimeType
-        public Object intercept(@This Object obj, @Origin Class<?> clazz, @AllArguments Object[] allArguments,
-                                @Origin Method method,
-                                @SuperCall Callable<?> callable) throws Throwable {
-            LOGGER.info(clazz.getName() + "." + method.getName() + " start");
-            Object call = callable.call();
-            LOGGER.info(clazz.getName() + "." + method.getName() + " end.");
-            return call;
-        }
-    }
-
 
     public static void agentmain(String agentArgs, Instrumentation inst) {
 

@@ -3,7 +3,6 @@ package com.xiaobaicai.agent.plugins.spring5.annotation;
 import com.xiaobaicai.agent.core.log.Logger;
 import com.xiaobaicai.agent.core.log.LoggerFactory;
 import com.xiaobaicai.agent.core.plugin.context.ContextManager;
-import com.xiaobaicai.agent.core.plugin.context.ContextSnapshot;
 import com.xiaobaicai.agent.core.plugin.interceptor.enhance.MethodAroundInterceptorV1;
 import com.xiaobaicai.agent.core.trace.ComponentDefine;
 
@@ -21,9 +20,6 @@ public class SpringAnnotationInterceptor implements MethodAroundInterceptorV1 {
     @Override
     public void beforeMethod(Object obj, Class<?> clazz, Method method, Object[] allArguments,
                              Class<?>[] argumentsTypes) {
-
-        ContextSnapshot capture = ContextManager.capture();
-        LOGGER.info("traceId=" + capture.getTraceId() + ", spanId=" + capture.getSpanId());
 
         String methodName = clazz.getName() + "." + method.getName();
         ContextManager.createSpan(ComponentDefine.SPRING, methodName);

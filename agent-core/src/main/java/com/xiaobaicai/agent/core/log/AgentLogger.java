@@ -18,6 +18,6 @@ public class AgentLogger extends AbstractLogger {
     public AgentLogger(Class clazz) {
         super(clazz);
         String projectVersion = clazz.getPackage().getImplementationVersion();
-        System.out.printf(BANNER, rootProjectName, projectVersion);
+        System.out.printf(BANNER, ROOT_PROJECT_NAME, projectVersion);
     }
 }

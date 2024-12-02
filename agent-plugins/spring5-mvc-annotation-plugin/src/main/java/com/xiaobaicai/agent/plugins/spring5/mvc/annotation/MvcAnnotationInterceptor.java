@@ -3,7 +3,6 @@ package com.xiaobaicai.agent.plugins.spring5.mvc.annotation;
 import com.xiaobaicai.agent.core.log.Logger;
 import com.xiaobaicai.agent.core.log.LoggerFactory;
 import com.xiaobaicai.agent.core.plugin.context.ContextManager;
-import com.xiaobaicai.agent.core.plugin.context.ContextSnapshot;
 import com.xiaobaicai.agent.core.plugin.interceptor.enhance.MethodAroundInterceptorV1;
 import com.xiaobaicai.agent.core.trace.ComponentDefine;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -31,9 +30,6 @@ public class MvcAnnotationInterceptor implements MethodAroundInterceptorV1 {
             ContextManager.createSpan(ComponentDefine.SPRING, url);
             return;
         }
-        ContextSnapshot capture = ContextManager.capture();
-        LOGGER.info("traceId=" + capture.getTraceId() + ", spanId=" + capture.getSpanId());
-
         ContextManager.createSpan(ComponentDefine.MVC, url);
     }
 

@@ -7,6 +7,7 @@ import com.xiaobaicai.agent.core.plugin.match.ClassAnnotationMatch;
 import com.xiaobaicai.agent.core.plugin.match.ClassMatch;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatchers;
 
 /**
  * @author liguang
@@ -39,7 +40,7 @@ public class RestControllerInstrumentation extends AbstractClassEnhancePluginDef
                 new InstanceMethodsInterceptPoint() {
                     @Override
                     public ElementMatcher<MethodDescription> getMethodsMatcher() {
-                        return null;
+                        return ElementMatchers.isPublic();
                     }
 
                     @Override
