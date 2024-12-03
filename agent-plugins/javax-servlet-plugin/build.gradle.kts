@@ -9,4 +9,5 @@ val versions = extra["versions"] as Map<*, *>
 
 dependencies {
     implementation("${versions["javax-servlet"]}")
+    implementation("${versions["tomcat10"]}")
 }

@@ -19,13 +19,24 @@ public class ServletInterceptor implements MethodAroundInterceptorV1 {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServletInterceptor.class);
 
     @Override
-    public void beforeMethod(Object obj, Class<?> clazz, Method method, Object[] allArguments, Class<?>[] argumentsTypes) throws Throwable {
+    public void beforeMethod(Object obj, Class<?> clazz, Method method, Object[] allArguments, Class<?>[] argumentsTypes) {
 
         for (Object allArgument : allArguments) {
-            LOGGER.info(allArgument.getClass().getName() + ":   " + (allArgument instanceof HttpServletRequest));
-            if (allArgument instanceof HttpServletRequest) {
+            boolean matchedJavax = allArgument instanceof HttpServletRequest;
+            String headerValue = null;
+            if (matchedJavax) {
                 HttpServletRequest request = (HttpServletRequest) allArgument;
-                String headerValue = request.getHeader(StressTestingConstant.HEADER_NAME_STRESS_TESTING_FLAG);
+                headerValue = request.getHeader(StressTestingConstant.HEADER_NAME_STRESS_TESTING_FLAG);
+            }
+
+            boolean matchedJakarta = allArgument instanceof jakarta.servlet.http.HttpServletRequest;
+            if (matchedJakarta) {
+                jakarta.servlet.http.HttpServletRequest request = (jakarta.servlet.http.HttpServletRequest) allArgument;
+                headerValue = request.getHeader(StressTestingConstant.HEADER_NAME_STRESS_TESTING_FLAG);
+            }
+
+            if (headerValue != null) {
+                LOGGER.info("检测到压测流量..");
                 ContextManager.setProperty(StressTestingConstant.HEADER_NAME_STRESS_TESTING_FLAG, StressTestingConstant.HEADER_VALUE_STRESS_TESTING_FLAG.equals(headerValue));
                 ContextManager.setProperty(StressTestingConstant.SHADOW_MODE_KEY, StressTestingConstant.SHADOW_MODE_DEFAULT_VALUE);
             }
@@ -33,7 +44,7 @@ public class ServletInterceptor implements MethodAroundInterceptorV1 {
     }
 
     @Override
-    public void afterMethod(Object obj, Class<?> clazz, Method method, Object[] allArguments, Class<?>[] argumentsTypes) throws Throwable {
+    public void afterMethod(Object obj, Class<?> clazz, Method method, Object[] allArguments, Class<?>[] argumentsTypes) {
 
     }
 }

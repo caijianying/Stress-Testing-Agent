@@ -18,7 +18,6 @@ repositories {
 }
 
 dependencies {
-    implementation("org.mybatis:mybatis:3.5.9")
     implementation("${versions["javax-servlet"]}")
     implementation(project(":agent-core"))
     implementation("${versions["byte-buddy"]}")
@@ -31,6 +30,8 @@ dependencies {
     testCompileOnly("${versions["junit"]}")
     testImplementation("${versions["junit.jupiter.api"]}")
     testImplementation("${versions["junit.jupiter.engine"]}")
+    // 兼容 mybatis 3.5.9
+    implementation("${versions["sqlParser"]}")
 
 
 }
@@ -39,7 +40,7 @@ tasks.test {
     useJUnitPlatform()
 }
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 tasks.withType<ShadowJar> {

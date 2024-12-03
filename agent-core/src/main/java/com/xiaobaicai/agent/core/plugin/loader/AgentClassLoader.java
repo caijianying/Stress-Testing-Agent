@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -100,11 +99,11 @@ public class AgentClassLoader extends ClassLoader {
                     data = baos.toByteArray();
                 }
                 return defineClass(name, data, 0, data.length);
-            } catch (IOException e) {
-                e.printStackTrace();
+            } catch (Throwable ignored) {
+                LOGGER.info("Can't find " + name + ", skipped.");
             }
         }
-        throw new ClassNotFoundException("Can't find " + name);
+        return null;
     }
 
     @Override

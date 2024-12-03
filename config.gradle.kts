@@ -28,6 +28,7 @@ var versions = mapOf(
     "junit.jupiter.engine" to "org.junit.jupiter:junit-jupiter-engine:5.8.2",
     "mybatis3" to "org.mybatis:mybatis:3.5.9",
     "sqlParser" to "com.github.jsqlparser:jsqlparser:4.5",
+    "tomcat10" to "org.apache.tomcat.embed:tomcat-embed-core:10.1.33"
 )
 extra["versions"] = versions
 
