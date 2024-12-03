@@ -18,7 +18,6 @@ repositories {
 }
 
 dependencies {
-    implementation("${versions["javax-servlet"]}")
     implementation(project(":agent-core"))
     implementation("${versions["byte-buddy"]}")
     implementation("${versions["byte-buddy-agent"]}")
@@ -30,7 +29,7 @@ dependencies {
     testCompileOnly("${versions["junit"]}")
     testImplementation("${versions["junit.jupiter.api"]}")
     testImplementation("${versions["junit.jupiter.engine"]}")
-    // 兼容 mybatis 3.5.9
+    // 兼容 mybatis3.5.9  @see https://baomidou.com/getting-started/install
     implementation("${versions["sqlParser"]}")
 
 

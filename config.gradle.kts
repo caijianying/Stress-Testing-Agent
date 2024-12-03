@@ -21,14 +21,11 @@ var versions = mapOf(
     "javassist" to "javassist:javassist:3.12.1.GA",
     "byte-buddy" to "net.bytebuddy:byte-buddy:1.12.8",
     "byte-buddy-agent" to "net.bytebuddy:byte-buddy-agent:1.12.8",
-//    "byte-buddy" to "net.bytebuddy:byte-buddy:1.8.20",
-//    "byte-buddy-agent" to "net.bytebuddy:byte-buddy-agent:1.8.20",
     "junit" to "junit:junit:4.13.1",
     "junit.jupiter.api" to "org.junit.jupiter:junit-jupiter-api:5.8.2",
     "junit.jupiter.engine" to "org.junit.jupiter:junit-jupiter-engine:5.8.2",
     "mybatis3" to "org.mybatis:mybatis:3.5.9",
-    "sqlParser" to "com.github.jsqlparser:jsqlparser:4.5",
-    "tomcat10" to "org.apache.tomcat.embed:tomcat-embed-core:10.1.33"
+    "sqlParser" to "com.github.jsqlparser:jsqlparser:4.5"
 )
 extra["versions"] = versions
 
