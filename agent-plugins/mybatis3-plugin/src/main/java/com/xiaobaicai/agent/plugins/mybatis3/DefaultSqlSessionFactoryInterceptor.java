@@ -12,7 +12,7 @@ import java.sql.SQLException;
 
 /**
  * @author caijy
- * @description
+ * @description  关注微信公众号【程序员小白菜】领取源码
  * @date 2024/11/27 星期三 17:21
  */
 public class DefaultSqlSessionFactoryInterceptor implements MethodAroundInterceptorV1 {

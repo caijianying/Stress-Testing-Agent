@@ -1,0 +1,1 @@
+dispatcherServlet=com.xiaobaicai.plugins.spring6.webmvc.DispatcherServletInstrumentation

@@ -9,6 +9,7 @@ public enum ComponentDefine {
     SPRING,
     MVC,
     DUBBO,
+    SQL
     ;
 
     private String name;

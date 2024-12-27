@@ -2,6 +2,7 @@ package com.xiaobaicai.agent.core.plugin.interceptor.enhance;
 
 import com.xiaobaicai.agent.core.log.Logger;
 import com.xiaobaicai.agent.core.log.LoggerFactory;
+import com.xiaobaicai.agent.core.plugin.meltdown.MeltDownManager;
 import com.xiaobaicai.agent.core.utils.IgnoredUtils;
 import net.bytebuddy.implementation.bind.annotation.*;
 
@@ -40,7 +41,21 @@ public class InstrumentMethodInterceptor {
         } catch (Throwable ex) {
             LOGGER.error(ex.getMessage());
         }
-        Object call = callable.call();
+
+        Object call = null;
+        if (interceptor.sendMeltDownMessage()) {
+            MeltDownManager.meltDownIfNecessary();
+            try {
+                call = callable.call();
+            } catch (Throwable ex) {
+                // 这里执行方法出现异常，也需要标记
+                MeltDownManager.markMeltDownFlag();
+                throw ex;
+            }
+            MeltDownManager.markMeltDownFlag();
+        } else {
+            call = callable.call();
+        }
 
         try {
             interceptor.handleResult(call);

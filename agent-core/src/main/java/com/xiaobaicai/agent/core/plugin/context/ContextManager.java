@@ -1,17 +1,13 @@
 package com.xiaobaicai.agent.core.plugin.context;
 
-import cn.hutool.core.lang.UUID;
+import cn.hutool.core.collection.CollectionUtil;
 import com.xiaobaicai.agent.core.boot.BootService;
 import com.xiaobaicai.agent.core.log.Logger;
 import com.xiaobaicai.agent.core.log.LoggerFactory;
-import com.xiaobaicai.agent.core.model.TraceSegment;
 import com.xiaobaicai.agent.core.plugin.span.LocalSpan;
 import com.xiaobaicai.agent.core.trace.ComponentDefine;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 /**
  * @author caijy
@@ -22,30 +18,111 @@ public class ContextManager implements BootService {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(ContextManager.class);
 
+    public static final ThreadLocal<Map<String, Object>> LOCAL_PROPERTY = new ThreadLocal<>();
+
+    public static final ThreadLocal<String> LOCAL_TRACE_ID = new ThreadLocal<>();
+
+    public static final ThreadLocal<LinkedList<String>> LOCAL_SPAN_ID_STACK = new ThreadLocal<>();
+
+    public static final ThreadLocal<Map<String, LocalSpan>> LOCAL_SPAN_CACHE = new ThreadLocal<>();
+
+    public static final ThreadLocal<LocalSpan> LOCAL_ROOT_SPAN = new ThreadLocal<>();
+
     private static final LinkedList<String> activeSpanIdMap = new LinkedList<>();
 
     private static final ThreadLocal<Stack> STACK_THREAD_LOCAL = new ThreadLocal<>();
-
-    private static final ThreadLocal<String> LOCAL_TRACE_ID = new ThreadLocal<>();
-    private static final ThreadLocal<Map<String, Object>> LOCAL_PROPERTY = new ThreadLocal<>();
 
     public static void createSpan(ComponentDefine component, String operatorName) {
         createSpan(component, operatorName, null);
     }
 
-    public static void createSpan(ComponentDefine component, String operatorName, ContextSnapshot snapshot) {
-        long start = System.currentTimeMillis();
+    public static void createSpan(ComponentDefine component, String operateName, ContextSnapshot snapshot) {
+        boolean root = isRoot();
+        if (root) {
+            init();
+        }
+        String spanId = java.util.UUID.randomUUID().toString();
         LocalSpan localSpan = LocalSpan.builder()
-                .isRoot(isRoot(snapshot))
-                .traceId(getOrCreateTraceId(snapshot))
-                .operatorName(operatorName)
+                .isRoot(root)
+                .traceId(getGlobalTraceId())
+                .spanId(spanId)
+                .parentSpanId(getParentSpanId())
+                .operateName(operateName)
                 .componentDefine(component)
-                .spanId(UUID.randomUUID().toString())
-                .parentSpanId(getParentSpanId(snapshot))
                 .build();
-        getStack().push(localSpan.getSpanId());
-        activeSpanIdMap.addLast(localSpan.getSpanId());
-        startSpan(localSpan, start);
+        register(localSpan);
+        localSpan.start();
+    }
+
+    public static void finishSpan() {
+        // 获取将要出栈的Span
+        LinkedList<String> methodStack = LOCAL_SPAN_ID_STACK.get();
+        String spanId = methodStack.peekLast();
+        LocalSpan localSpan = LOCAL_SPAN_CACHE.get().get(spanId);
+        // 耗时记录
+        localSpan.finish();
+        // 出栈
+        methodStack.removeLast();
+
+        if (methodStack.isEmpty()) {
+            // 打印trace链路
+            printTraceInformation();
+            // 释放资源
+            remove();
+        }
+    }
+
+    public static void printTraceInformation() {
+        Map<String, LocalSpan> spanMap = LOCAL_SPAN_CACHE.get();
+        LocalSpan rootSpan = LOCAL_ROOT_SPAN.get();
+        int depth = 0;
+        String spanId = rootSpan.getSpanId();
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n").append("【ROOT】").append(rootSpan.getOperateName()).append("  ").append(rootSpan.getCostTime()).append("ms").append("\n");
+        appendChildren(spanMap, spanId, depth, sb);
+        LOGGER.info(sb.toString());
+    }
+
+    private static void appendChildren(Map<String, LocalSpan> spanMap, String spanId, int depth, StringBuilder sb) {
+        List<Map.Entry<String, LocalSpan>> childSpanList = spanMap.entrySet().stream().filter(span -> spanId.equals(span.getValue().getParentSpanId())).toList();
+        if (CollectionUtil.isEmpty(childSpanList)) {
+            return;
+        }
+        depth++;
+        for (Map.Entry<String, LocalSpan> childSpanEntry : childSpanList) {
+            LocalSpan childSpan = childSpanEntry.getValue();
+            sb.append("     ".repeat(depth));
+            sb.append("【").append(childSpan.getComponentDefine().name()).append("】");
+            sb.append(childSpan.getOperateName()).append("  ").append(childSpan.getCostTime()).append("ms").append("\n");
+            appendChildren(spanMap, childSpanEntry.getKey(), depth, sb);
+        }
+    }
+
+    public static void remove() {
+        LOCAL_TRACE_ID.remove();
+        LOCAL_SPAN_ID_STACK.remove();
+        LOCAL_SPAN_CACHE.remove();
+        LOCAL_ROOT_SPAN.remove();
+        LOCAL_PROPERTY.remove();
+    }
+
+    public static void register(LocalSpan localSpan) {
+        String spanId = localSpan.getSpanId();
+        LOCAL_SPAN_ID_STACK.get().addLast(spanId);
+        LOCAL_SPAN_CACHE.get().put(spanId, localSpan);
+        if (localSpan.isRoot()) {
+            LOCAL_ROOT_SPAN.set(localSpan);
+        }
+    }
+
+    public static String getGlobalTraceId() {
+        return LOCAL_TRACE_ID.get();
+    }
+
+    public static void init() {
+        LOCAL_TRACE_ID.set(java.util.UUID.randomUUID().toString());
+        LOCAL_SPAN_ID_STACK.set(new LinkedList<>());
+        LOCAL_SPAN_CACHE.set(new LinkedHashMap<>());
     }
 
     private static Stack<String> getStack() {
@@ -54,45 +131,6 @@ public class ContextManager implements BootService {
             STACK_THREAD_LOCAL.set(activeSpanIdStack);
         }
         return STACK_THREAD_LOCAL.get();
-    }
-
-    private static void startSpan(LocalSpan localSpan, Long start) {
-
-        RuntimeContext.TraceModel model = new RuntimeContext.TraceModel();
-        model.setRoot(localSpan.getIsRoot());
-        model.setComponent(localSpan.getComponentDefine().name());
-        model.setName(localSpan.getOperatorName());
-        model.setStart(start);
-        model.setTraceId(localSpan.getTraceId());
-        model.setSpanId(localSpan.getSpanId());
-        model.setParentSpanId(localSpan.getParentSpanId());
-
-        if (localSpan.getIsRoot()) {
-            model.setParentSpanId("0");
-        }
-        RuntimeContext.registerTraceInfo(model);
-    }
-
-    public static void stopSpan() {
-        String traceId = LOCAL_TRACE_ID.get();
-        if (getStack().size() > 0) {
-            String spanId = getStack().pop();
-            RuntimeContext.exit(traceId, spanId);
-            activeSpanIdMap.remove(spanId);
-        }
-        if (activeSpanIdMap.isEmpty()) {
-            printInformation(traceId);
-            clear(traceId);
-        }
-    }
-
-    private static void clear(String traceId) {
-        if (traceId != null) {
-            RuntimeContext.clearTrace(traceId);
-        }
-        LOCAL_TRACE_ID.remove();
-        activeSpanIdMap.clear();
-        STACK_THREAD_LOCAL.remove();
     }
 
     public static ContextSnapshot capture() {
@@ -107,35 +145,19 @@ public class ContextManager implements BootService {
         return LOCAL_TRACE_ID.get() == null && contextSnapshot == null;
     }
 
+    private static String getParentSpanId() {
+        return getParentSpanId(null);
+    }
+
     private static String getParentSpanId(ContextSnapshot contextSnapshot) {
         if (contextSnapshot != null) {
             return contextSnapshot.getSpanId();
         }
-        if (!getStack().isEmpty()) {
-            return getStack().peek();
+        LinkedList<String> methodInvokeList = LOCAL_SPAN_ID_STACK.get();
+        if (methodInvokeList.isEmpty()) {
+            return "0";
         }
-        return null;
-    }
-
-    public static boolean isActive() {
-        return !activeSpanIdMap.isEmpty();
-    }
-
-    private static void printInformation(String traceId) {
-        TraceSegment traceSegment = RuntimeContext.getTraceSegment(traceId);
-    }
-
-    public static String getOrCreateTraceId(ContextSnapshot contextSnapshot) {
-        String traceId = LOCAL_TRACE_ID.get();
-        if (traceId == null) {
-            if (contextSnapshot != null) {
-                traceId = contextSnapshot.getTraceId();
-            } else {
-                traceId = UUID.fastUUID().toString();
-            }
-            LOCAL_TRACE_ID.set(traceId);
-        }
-        return traceId;
+        return methodInvokeList.getLast();
     }
 
     public static void setProperty(String key, Object value) {
@@ -153,12 +175,12 @@ public class ContextManager implements BootService {
     }
 
     @Override
-    public void boot() throws Throwable {
+    public void boot() {
 
     }
 
     @Override
-    public void shutdown() throws Throwable {
+    public void shutdown() {
 
     }
 }

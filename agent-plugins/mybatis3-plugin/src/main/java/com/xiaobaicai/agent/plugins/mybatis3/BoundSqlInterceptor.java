@@ -1,5 +1,6 @@
 package com.xiaobaicai.agent.plugins.mybatis3;
 
+import com.xiaobaicai.agent.core.config.AgentConfig;
 import com.xiaobaicai.agent.core.constants.StressTestingConstant;
 import com.xiaobaicai.agent.core.log.Logger;
 import com.xiaobaicai.agent.core.log.LoggerFactory;
@@ -19,7 +20,7 @@ import java.util.Set;
 
 /**
  * @author caijy
- * @description
+ * @description  关注微信公众号【程序员小白菜】领取源码
  * @date 2024/11/26 星期二 17:46
  */
 public class BoundSqlInterceptor implements MethodAroundInterceptorV1 {
@@ -30,14 +31,14 @@ public class BoundSqlInterceptor implements MethodAroundInterceptorV1 {
 
     @Override
     public void beforeMethod(Object obj, Class<?> clazz, Method method, Object[] allArguments, Class<?>[] argumentsTypes) {
-        Boolean inPt = (Boolean) ContextManager.getProperty(StressTestingConstant.HEADER_NAME_STRESS_TESTING_FLAG);
+        Boolean inPt = (Boolean) ContextManager.getProperty(StressTestingConstant.IN_PT_KEY);
         if (inPt != null && inPt) {
-            String shadowMode = (String) ContextManager.getProperty(StressTestingConstant.SHADOW_MODE_KEY);
+            String shadowMode = AgentConfig.getShadowMode();
             try {
-                if (StressTestingConstant.SHADOW_MODE_TABLE_VALUE.equals(shadowMode)) {
+                if (AgentConfig.SHADOW_MODE_TABLE.equals(shadowMode)) {
                     switchToShadowTable(obj);
                 }
-                if (StressTestingConstant.SHADOW_MODE_DATABASE_VALUE.equals(shadowMode)) {
+                if (AgentConfig.SHADOW_MODE_DB.equals(shadowMode)) {
                     switchToShadowDataBase(obj);
                 }
             } catch (Throwable ex) {
@@ -82,7 +83,7 @@ public class BoundSqlInterceptor implements MethodAroundInterceptorV1 {
 
             // 修改字段值
             Object dataBaseName = ContextManager.getProperty(StressTestingConstant.DATABASE_NAME_KEY);
-            String newDataBaseName = "p_" + dataBaseName;
+            String newDataBaseName = dataBaseName + "_";
             String modifiedSql = "use " + newDataBaseName + ";" + originalSql;
             sqlField.set(obj, modifiedSql);
             LOGGER.info("SwitchToShadowDataBase, Modified SQL: " + modifiedSql);

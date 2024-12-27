@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * @author caijy
  * @description isRoot, traceId, component, name, parentSpanId spanId
@@ -15,11 +18,31 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Data
-public class LocalSpan {
+public class LocalSpan implements Serializable {
+    @Serial
+    private static final long serialVersionUID = -7335003348952891472L;
+
+    private boolean isRoot;
     private String traceId;
     private String spanId;
     private String parentSpanId;
-    private Boolean isRoot;
+
+    /**
+     * 链路名称
+     **/
+    private String operateName;
+
+    private Long startTime;
+
+    private Long costTime;
+
     private ComponentDefine componentDefine;
-    private String operatorName;
+
+    public void start() {
+        this.startTime = System.currentTimeMillis();
+    }
+
+    public void finish() {
+        this.costTime = System.currentTimeMillis() - startTime;
+    }
 }

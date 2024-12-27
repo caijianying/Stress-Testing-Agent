@@ -1,5 +1,6 @@
 package com.xiaobaicai.agent;
 
+import com.xiaobaicai.agent.core.config.AgentConfig;
 import com.xiaobaicai.agent.core.log.Logger;
 import com.xiaobaicai.agent.core.log.LoggerFactory;
 import com.xiaobaicai.agent.core.plugin.PluginUtil;
@@ -10,7 +11,7 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
 
 /**
  * @author caijy
- * @description
+ * @description 关注微信公众号【程序员小白菜】领取源码
  * @date 2024/11/6 星期三 16:04
  */
 public class StressTestingAgent {
@@ -19,6 +20,8 @@ public class StressTestingAgent {
 
     public static void premain(String agentArgs, Instrumentation inst) {
         LOGGER.info("StressTestingAgent >> premain");
+
+        AgentConfig.readArgs(agentArgs);
 
         AgentClassLoader.initDefaultLoader();
 
@@ -34,16 +37,6 @@ public class StressTestingAgent {
 
         agentBuilder = PluginUtil.loadPluginsThenTransfer(agentBuilder);
 
-
-//        agentBuilder = agentBuilder.type(ElementMatchers.isAnnotatedWith(ElementMatchers.named("org.springframework.web.bind.annotation.RestController")))
-//                .transform((builder, typeDescription, classLoader, module) -> builder
-//                        .method(ElementMatchers.isPublic()).intercept(MethodDelegation.to(new SqlInterceptor()))
-//                );
-//
-//        agentBuilder = agentBuilder.type(ElementMatchers.named("org.springframework.web.servlet.DispatcherServlet"))
-//                .transform((builder, typeDescription, classLoader, module) -> builder
-//                        .method(ElementMatchers.named("doDispatch")).intercept(MethodDelegation.to(new SqlInterceptor()))
-//                );
 
         agentBuilder.with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
                 .installOn(inst);
