@@ -15,11 +15,12 @@
 * 熔断处理，请求时间过长会通知停止压测
 * BoundSql拦截器中临时方案优化
 * 重构支持插件化
+* 简易的日志框架
 
 # 实现原理及关键技术
 * JavaAgent的Attach机制
 * 字节码框架 ByteBuddy
-* SkyWalking
+* SkyWalking插件化
 
 # 运行环境
 * JDK 17

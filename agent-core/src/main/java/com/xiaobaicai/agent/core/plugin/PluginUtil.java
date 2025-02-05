@@ -22,14 +22,11 @@ import com.xiaobaicai.agent.core.plugin.match.ClassMatch;
 import com.xiaobaicai.agent.core.plugin.match.IndirectMatch;
 import com.xiaobaicai.agent.core.plugin.match.NameMatch;
 import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.FieldAccessor;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
 
-import static com.xiaobaicai.agent.core.plugin.AbstractClassEnhancePluginDefine.CONTEXT_ATTR_NAME;
 import static net.bytebuddy.jar.asm.Opcodes.ACC_PRIVATE;
 import static net.bytebuddy.jar.asm.Opcodes.ACC_VOLATILE;
 
@@ -40,6 +37,8 @@ import static net.bytebuddy.jar.asm.Opcodes.ACC_VOLATILE;
 public class PluginUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginUtil.class);
+
+    public static final String CONTEXT_ATTR_NAME = "_$EnhancedClassField_ws";
 
     public static List<AbstractClassEnhancePluginDefine> loadPlugin() {
         List<PluginDefine> pluginClassList = new LinkedList<>();
