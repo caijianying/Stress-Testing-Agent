@@ -56,6 +56,6 @@ public class BoundSqlInstrumentation extends AbstractClassEnhancePluginDefine {
 
     @Override
     public boolean useEnhancedInstance() {
-        return false;
+        return true;
     }
 }

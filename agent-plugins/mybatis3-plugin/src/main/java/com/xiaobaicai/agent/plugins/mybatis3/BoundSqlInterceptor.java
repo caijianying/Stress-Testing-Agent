@@ -5,6 +5,7 @@ import com.xiaobaicai.agent.core.constants.StressTestingConstant;
 import com.xiaobaicai.agent.core.log.Logger;
 import com.xiaobaicai.agent.core.log.LoggerFactory;
 import com.xiaobaicai.agent.core.plugin.context.ContextManager;
+import com.xiaobaicai.agent.core.plugin.interceptor.enhance.EnhancedInstance;
 import com.xiaobaicai.agent.core.plugin.interceptor.enhance.MethodAroundInterceptorV1;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -14,20 +15,16 @@ import org.apache.ibatis.mapping.BoundSql;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @author caijy
- * @description  关注微信公众号【程序员小白菜】领取源码
+ * @description 关注微信公众号【程序员小白菜】领取源码
  * @date 2024/11/26 星期二 17:46
  */
 public class BoundSqlInterceptor implements MethodAroundInterceptorV1 {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BoundSqlInterceptor.class);
-
-    private static final Set<Object> invokerSet = new HashSet<>();
 
     @Override
     public void beforeMethod(Object obj, Class<?> clazz, Method method, Object[] allArguments, Class<?>[] argumentsTypes) {
@@ -36,6 +33,7 @@ public class BoundSqlInterceptor implements MethodAroundInterceptorV1 {
             String shadowMode = AgentConfig.getShadowMode();
             try {
                 if (AgentConfig.SHADOW_MODE_TABLE.equals(shadowMode)) {
+                    LOGGER.info(obj.toString());
                     switchToShadowTable(obj);
                 }
                 if (AgentConfig.SHADOW_MODE_DB.equals(shadowMode)) {
@@ -53,7 +51,9 @@ public class BoundSqlInterceptor implements MethodAroundInterceptorV1 {
     }
 
     private static void switchToShadowTable(Object obj) throws NoSuchFieldException, IllegalAccessException {
-        if (invokerSet.add(obj)) {
+        EnhancedInstance enhancedInstance = (EnhancedInstance) obj;
+        if (enhancedInstance.getDynamicField() == null) {
+            enhancedInstance.setDynamicField(true);
             // 影子表
             BoundSql boundSql = (BoundSql) obj;
             String originalSql = boundSql.getSql();
@@ -71,7 +71,9 @@ public class BoundSqlInterceptor implements MethodAroundInterceptorV1 {
     }
 
     private static void switchToShadowDataBase(Object obj) throws NoSuchFieldException, IllegalAccessException {
-        if (invokerSet.add(obj)) {
+        EnhancedInstance enhancedInstance = (EnhancedInstance) obj;
+        if (enhancedInstance.getDynamicField() == null) {
+            enhancedInstance.setDynamicField(true);
             // 影子库
             BoundSql boundSql = (BoundSql) obj;
             String originalSql = boundSql.getSql();

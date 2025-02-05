@@ -14,6 +14,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import com.xiaobaicai.agent.core.log.Logger;
 import com.xiaobaicai.agent.core.log.LoggerFactory;
 import com.xiaobaicai.agent.core.plugin.interceptor.InstanceMethodsInterceptPoint;
+import com.xiaobaicai.agent.core.plugin.interceptor.enhance.EnhancedInstance;
 import com.xiaobaicai.agent.core.plugin.interceptor.enhance.InstrumentMethodInterceptor;
 import com.xiaobaicai.agent.core.plugin.interceptor.enhance.MethodAroundInterceptorV1;
 import com.xiaobaicai.agent.core.plugin.loader.AgentClassLoader;
@@ -21,9 +22,16 @@ import com.xiaobaicai.agent.core.plugin.match.ClassMatch;
 import com.xiaobaicai.agent.core.plugin.match.IndirectMatch;
 import com.xiaobaicai.agent.core.plugin.match.NameMatch;
 import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.implementation.FieldAccessor;
 import net.bytebuddy.implementation.MethodDelegation;
 import net.bytebuddy.matcher.ElementMatcher;
 import net.bytebuddy.matcher.ElementMatchers;
+
+import static com.xiaobaicai.agent.core.plugin.AbstractClassEnhancePluginDefine.CONTEXT_ATTR_NAME;
+import static net.bytebuddy.jar.asm.Opcodes.ACC_PRIVATE;
+import static net.bytebuddy.jar.asm.Opcodes.ACC_VOLATILE;
 
 /**
  * @author liguang
@@ -120,14 +128,22 @@ public class PluginUtil {
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
                     throw new RuntimeException(e);
                 }
-                if (newInstance == null) {
-                    continue;
-                }
                 Object finalNewInstance = newInstance;
                 agentBuilder = agentBuilder.type(typeJunction)
-                        .transform((builder, typeDescription, classLoader, module) -> builder
-                                .method(point.getMethodsMatcher())
-                                .intercept(MethodDelegation.to(new InstrumentMethodInterceptor((MethodAroundInterceptorV1) finalNewInstance)))
+                        .transform((builder, typeDescription, classLoader, module) ->
+                                {
+                                    if (pluginDefine.useEnhancedInstance()) {
+                                        if (!typeDescription.isAssignableTo(EnhancedInstance.class)) {
+                                            builder = builder.defineField(
+                                                            CONTEXT_ATTR_NAME, Object.class, ACC_PRIVATE | ACC_VOLATILE)
+                                                    .implement(EnhancedInstance.class)
+                                                    .intercept(FieldAccessor.ofField(CONTEXT_ATTR_NAME));
+                                        }
+                                    }
+                                    builder = builder.method(point.getMethodsMatcher())
+                                            .intercept(MethodDelegation.to(new InstrumentMethodInterceptor((MethodAroundInterceptorV1) finalNewInstance)));
+                                    return builder;
+                                }
                         );
             }
         }
