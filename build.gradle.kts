@@ -43,6 +43,12 @@ kotlin {
 }
 
 tasks.withType<ShadowJar> {
+    // 为接入方便 统一生成agent.jar
+    archiveBaseName.set("agent")
+    // 设置版本号
+    archiveVersion.set("")
+    // 设为空，避免生成 `-all` 后缀
+    archiveClassifier.set("")
     manifest {
         attributes(
             "Implementation-Version" to version,
