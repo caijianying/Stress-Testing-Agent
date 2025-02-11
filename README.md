@@ -5,7 +5,7 @@
 [![](https://img.shields.io/badge/Author-小白菜-orange.svg)](https://caijianying.github.io)
 
 # 介绍
-基于SkyWalking搭建的全链路压测Agent，该项目请勿用于商业用途
+基于SkyWalking搭建的全链路压测Agent，该项目仅供学习使用
 
 # 主要特性
 * 拦截网络请求，识别压测标
