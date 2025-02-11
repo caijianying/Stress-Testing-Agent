@@ -1,5 +1,7 @@
 package com.xiaobaicai.agent.core.config;
 
+import cn.hutool.core.util.StrUtil;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +18,9 @@ public class AgentConfig {
     private static final String DEFAULT_SHADOW_MODE = SHADOW_MODE_TABLE;
 
     public static void readArgs(String agentArgs) {
+        if (StrUtil.isBlank(agentArgs)) {
+            return;
+        }
         String[] args = agentArgs.split("&");
         for (String arg : args) {
             String[] param = arg.split("=");
