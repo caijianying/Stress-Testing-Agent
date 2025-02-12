@@ -33,7 +33,6 @@ public class BoundSqlInterceptor implements MethodAroundInterceptorV1 {
             String shadowMode = AgentConfig.getShadowMode();
             try {
                 if (AgentConfig.SHADOW_MODE_TABLE.equals(shadowMode)) {
-                    LOGGER.info(obj.toString());
                     switchToShadowTable(obj);
                 }
                 if (AgentConfig.SHADOW_MODE_DB.equals(shadowMode)) {
